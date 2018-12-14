@@ -1,0 +1,5 @@
+/.env*
+/.psc*
+/*.tgz
+/node_modules/
+/output/

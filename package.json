@@ -1,0 +1,37 @@
+{
+  "name": "purescript-bouzuya-command-line-option-parser",
+  "description": "command-line option parser",
+  "version": "0.0.0",
+  "author": {
+    "url": "https://bouzuya.net/",
+    "name": "bouzuya",
+    "email": "m@bouzuya.net"
+  },
+  "bugs": {
+    "url": "https://github.com/bouzuya/purescript-bouzuya-command-line-option-parser/issues"
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.5",
+    "psc-package": "^3.0.1",
+    "purescript": "^0.12.1"
+  },
+  "homepage": "https://github.com/bouzuya/purescript-bouzuya-command-line-option-parser#readme",
+  "keywords": [],
+  "license": "MIT",
+  "main": "index.js",
+  "repository": {
+    "url": "git+https://github.com/bouzuya/purescript-bouzuya-command-line-option-parser.git",
+    "type": "git"
+  },
+  "scripts": {
+    "build": "psc-package sources | xargs purs compile 'src/**/*.purs' 'test/**/*.purs'",
+    "bundle": "purs bundle 'output/**/*.js' --main Main --module Main --output bundle.js",
+    "install:purs": "psc-package install",
+    "prepare": "npm-run-all -s 'install:purs' build",
+    "psc-package": "psc-package",
+    "purs": "purs",
+    "repl": "psc-package repl -- 'test/**/*.purs'",
+    "start": "node --eval \"require('./output/Main').main();\"",
+    "test": "node --eval \"require('./output/Test.Main').main();\""
+  }
+}
