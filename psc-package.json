@@ -6,6 +6,8 @@
     "foreign-object",
     "prelude",
     "psci-support",
+    "record",
+    "strings",
     "test-unit"
   ]
 }
