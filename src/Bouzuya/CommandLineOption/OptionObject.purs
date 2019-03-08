@@ -100,8 +100,12 @@ insertOrUpdate d v (OptionObject o) = do
   assert' "many times" (isValueMultiple (getOption d) || not (Object.member k o))
   pure (OptionObject (Object.alter (\m -> Just ((fromMaybe [] m) <> v)) k o))
 
-parse :: Array NamedOptionDefinition -> Array String -> Either String ParsedOption
-parse defs ss = do
+parse ::
+  { greedyArguments :: Boolean }
+  -> Array NamedOptionDefinition
+  -> Array String
+  -> Either String ParsedOption
+parse { greedyArguments } defs ss = do
   { arguments, options, processing } <-
     foldM
       f

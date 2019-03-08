@@ -17,7 +17,7 @@ import Test.Unit.Assert as Assert
 tests :: TestSuite
 tests = suite "Bouzuya.CommandLineOption.OptionObject" do
   let
-    f = parse
+    f = parse { greedyArguments: false }
     defs =
       [ withName "aString" (untyped (stringOption "a-string" (Just 'a') "<a>" "a string option" "a1"))
       , withName "bString" (untyped (maybeStringOption "b-string" (Just 'b') "<b>" "b string option" Nothing))
