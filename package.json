@@ -23,14 +23,12 @@
     "type": "git"
   },
   "scripts": {
-    "build": "psc-package sources | xargs purs compile 'src/**/*.purs' 'test/**/*.purs'",
-    "bundle": "purs bundle 'output/**/*.js' --main Main --module Main --output bundle.js",
-    "install:purs": "psc-package install",
-    "prepare": "npm-run-all -s 'install:purs' build",
-    "psc-package": "psc-package",
+    "build": "spago build",
+    "prepare": "npm run build",
     "purs": "purs",
-    "repl": "psc-package repl -- 'test/**/*.purs'",
+    "repl": "spago repl",
+    "spago": "spago",
     "start": "node --eval \"require('./output/Main').main();\"",
-    "test": "node --eval \"require('./output/Test.Main').main();\""
+    "test": "spago test"
   }
 }
