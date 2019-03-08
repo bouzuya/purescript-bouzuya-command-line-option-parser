@@ -8,6 +8,7 @@ import Bouzuya.CommandLineOption.OptionObject (OptionObject, getFirstValue, getV
 import Bouzuya.CommandLineOption.OptionObject as OptionObject
 import Data.Array as Array
 import Data.Either (Either(..))
+import Data.Foldable as Foldable
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Prelude (discard, map)
@@ -18,6 +19,7 @@ tests :: TestSuite
 tests = suite "Bouzuya.CommandLineOption.OptionObject" do
   let
     f = parse { greedyArguments: false }
+    f' = parse { greedyArguments: true }
     defs =
       [ withName "aString" (untyped (stringOption "a-string" (Just 'a') "<a>" "a string option" "a1"))
       , withName "bString" (untyped (maybeStringOption "b-string" (Just 'b') "<b>" "b string option" Nothing))
@@ -271,3 +273,132 @@ tests = suite "Bouzuya.CommandLineOption.OptionObject" do
   test "hasKey" do
     Assert.equal false (hasKey "unknown" defaults)
     Assert.equal true (hasKey "aString" defaults)
+
+  suite "greedyArguments" do
+    test "options" do
+      let
+        cases =
+          [ Tuple
+              { arguments: []
+              , options: u (o [a "eString" ["e1", "e2"]]) defaults
+              }
+              ["--e-string", "e1", "--e-string", "e2"]
+          , Tuple
+              { arguments: []
+              , options: u (o [a "eString" ["e1", "e2"]]) defaults
+              }
+              ["--e-string=e1", "--e-string=e2"]
+          , Tuple
+              { arguments: []
+              , options: u (o [b "cBoolean" true]) defaults
+              }
+              ["--c-boolean"]
+          , Tuple
+              { arguments: []
+              , options:
+                  u
+                    (o
+                      [ s "aString" "a2"
+                      , b "cBoolean" true
+                      ])
+                    defaults
+              }
+              [ "--a-string"
+              , "a2"
+              , "--c-boolean"
+              ]
+          , Tuple
+              { arguments: []
+              , options:
+                  u
+                    (o
+                      [ s "aString" "a2"
+                      , b "cBoolean" true
+                      , a "eString" ["e1", "e2"]
+                      ])
+                    defaults
+              }
+              [ "-a"
+              , "a2"
+              , "-c"
+              , "-e"
+              , "e1"
+              , "-e"
+              , "e2"
+              ]
+          , Tuple
+              { arguments: []
+              , options:
+                  u
+                    (o
+                      [ s "aString" "a2"
+                      , b "cBoolean" true
+                      , b "dBoolean" true
+                      ])
+                    defaults
+              }
+              [ "-a=a2"
+              , "-cd"
+              ]
+          ]
+      Foldable.for_ cases \(Tuple result args) -> do
+        Assert.equal (Right result) (f' defs args)
+    test "arguments" do
+      let
+        cases =
+          [ Tuple
+              (Right { arguments: ["arg1", "arg2"], options: defaults })
+              ["arg1", "arg2"]
+          , Tuple
+              (Right
+                { arguments: ["arg1", "arg2"]
+                , options: u (o [ b "cBoolean" true]) defaults
+                })
+              ["-c", "arg1", "arg2"]
+          , Tuple
+              -- NOTE: greedyArguments: true
+              (Right
+                { arguments: ["arg1", "arg2", "-c"]
+                , options: defaults
+                })
+              ["arg1", "arg2", "-c"]
+          , Tuple
+              -- NOTE: greedyArguments: true
+              (Right
+                { arguments: ["arg1", "arg2", "-cd"]
+                , options: defaults
+                })
+              ["arg1", "arg2", "-cd"]
+          , Tuple
+              (Left "unknown option") -- TODO: improve message
+              ["--unknown"]
+          , Tuple
+              (Left "unknown option") -- TODO: improve message
+              ["-u"]
+          , Tuple
+              (Left "unknown boolean option") -- TODO: improve message
+              ["-cu"]
+          , Tuple
+              (Left "no metavar (end)") -- TODO: improve message
+              ["--a-string"]
+          , Tuple
+              (Left "no metavar (end)") -- TODO: improve message
+              ["-a"]
+          , Tuple
+              (Left "no metavar (next)") -- TODO: improve message
+              ["--a-string", "--c-boolean"]
+          , Tuple
+              (Left "no metavar (next)") -- TODO: improve message
+              ["-a", "--c-boolean"]
+          , Tuple
+              (Left "no metavar (next)") -- TODO: improve message
+              ["--a-string", "-c"]
+          , Tuple
+              (Left "no metavar (next)") -- TODO: improve message
+              ["-a", "-c"]
+          , Tuple
+              (Left "many times") -- TODO: improve message
+              ["--a-string", "a", "--a-string", "b"]
+          ]
+      Foldable.for_ cases \(Tuple expected args) -> do
+        Assert.equal expected (f' defs args)

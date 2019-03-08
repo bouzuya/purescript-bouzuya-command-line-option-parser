@@ -109,17 +109,27 @@ parse { greedyArguments } defs ss = do
   { arguments, options, processing } <-
     foldM
       f
-      { arguments: [], options: OptionObject Object.empty, processing: Nothing }
+      { arguments: []
+      , endOptions: false
+      , options: OptionObject Object.empty
+      , processing: Nothing
+      }
       ss
   _ <- assert' "no metavar (end)" (isNothing processing)
   Right { arguments, options: merge options (defaultValues defs) }
   where
-    f a@{ arguments, options, processing: Nothing } s =
+    f a@{ arguments, endOptions: true, options } s =
+      Right a { arguments = Array.snoc arguments s }
+    f a@{ arguments, endOptions: false, options, processing: Nothing } s =
       case parse' s of
         [] -> -- foo
-          Right a { arguments = Array.snoc arguments s }
-        [{ name, value: valueMaybe }] -> do -- -a or --abc
           -- TODO: long == "" -- double hyphen (--) support
+          Right
+            (a
+              { arguments = Array.snoc arguments s
+              , endOptions = greedyArguments
+              })
+        [{ name, value: valueMaybe }] -> do -- -a or --abc
           _ <- assert' "invalid option position" (Array.null arguments)
           def <- note "unknown option" (findByOptionName name defs)
           case valueMaybe of
@@ -146,7 +156,7 @@ parse { greedyArguments } defs ss = do
               Right a' { options = o })
             a
             shortOptions
-    f a@{ options, processing: Just def } s =
+    f a@{ options, endOptions: false, processing: Just def } s =
       case parse' s of
         [] -> do
           o <- addStringOptionValue def s options
