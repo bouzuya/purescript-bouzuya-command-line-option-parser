@@ -1,5 +1,6 @@
+/*.tgz
 /.env*
 /.psc*
-/*.tgz
+/.spago/
 /node_modules/
 /output/
