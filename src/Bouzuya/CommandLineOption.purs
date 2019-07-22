@@ -16,7 +16,7 @@ import Bouzuya.CommandLineOption.RecordToArray as RecordToArray
 import Data.Either (Either, note)
 import Prelude (bind, pure)
 import Prim.RowList (class RowToList, Cons, Nil, kind RowList)
-import Type.Row (class ListToRow)
+import Type.RowList (class ListToRow)
 
 type Parsed r =
   { arguments :: Array String
