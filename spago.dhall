@@ -13,6 +13,7 @@ You can edit this file as you like.
     , "record"
     , "strings"
     , "test-unit"
+    , "typelevel-prelude"
     ]
 , packages =
     ./packages.dhall
